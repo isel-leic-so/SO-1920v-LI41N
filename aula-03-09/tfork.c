@@ -1,3 +1,11 @@
+/*---------------------------------------------------
+ * child proc creation and illustration of zombie state
+ * and other (peculiar) fork behaviour.
+ * 
+ * 
+ * Isel, 2020
+ */
+
 #include <stdio.h>
 #include <unistd.h>	// fork, sleep
 #include <errno.h>

@@ -1,3 +1,12 @@
+
+/*---------------------------------------------------------------
+ * Executes in a separated process the command (parameterless)
+ * passed by argument, but now supporting output redirection
+ * 
+ * 
+ * Isel, 2020
+ *--------------------------------------------------------------*/
+
 #include <stdio.h>
 #include <unistd.h>
 #include <errno.h>

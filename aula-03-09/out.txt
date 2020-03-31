@@ -1,8 +1,0 @@
-out.txt
-texec
-texec.c
-texec_redir
-texec_redir.c
-tfork
-tfork.c
-x

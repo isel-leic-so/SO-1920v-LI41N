@@ -1,45 +1,39 @@
-#include <unistd.h>
+
+/*----------------------------------------------------------------
+ *  This program uses a large initialized  buffer
+ *  using it for read and write. 
+ *   
+ * 
+ *  For each step it show mem info stats
+ * 
+ * Isel, 2020
+ * 
+ * Build:
+ * 		gcc -o mem -Wall mem.c ../utils/memutils.c
+ * 
+ *---------------------------------------------------------------*/
+ 
 #include <stdio.h>
-#include <string.h>
+#include "../utils/memutils.h"
+ 
 
-typedef unsigned char byte;
-typedef unsigned long ulong;
 
-#define DATALEN (1024*1024*300)
+#define DATALEN (100*1024*1024)
 
-static byte data[DATALEN] = { 1 };
-
-void show_avail_mem(const char *msg) {
-	FILE *meminfo = fopen("/proc/meminfo", "r");
-	char line[512];
-	int free;
-	
-	if (meminfo == NULL) {
-		fprintf(stderr, "error getting meminfo!\n");
-		return;
-	}
-	while (fgets(line, 512, meminfo) != NULL) {
-		
-		if (strstr(line, "MemAvailable:") == line) {
-			//printf("MemAvailable found!\n");
-			if (sscanf(line, "MemAvailable:%d", &free) == 1) {
-				printf("%s: Found %dKb of available memory\n", msg, free);
-				break;
-			}
-		}
-	 
-	}
-	fclose(meminfo);
-}
-
+static int data[DATALEN] = {1};
+ 
 ulong read_data() {
 	ulong sum = 0;
-	ulong i;
+	ulong i, c=0;
 
-	for (i = 0; i < DATALEN; ++i)
+	for (i = 0; i < DATALEN; ++i) {
 		sum += data[i];
+		c++;
+	}
+	printf("count=%ld\n", c);
 	return sum;
 }
+
 
 void write_data(int v) {
 	ulong i;
@@ -47,16 +41,13 @@ void write_data(int v) {
 		data[i] = v;
 }
 
-void phase_start(const char* phaseName) {
-	printf("Prima RETURN para %s\t[%u]\n", phaseName, getpid());
-	getchar();
-}
-
+ 
 int main()
 {
 	show_avail_mem("Inicio");
 	phase_start("ler");
-	read_data();
+	
+	printf("data sum=%ld\n", read_data());
 	show_avail_mem("Depois de ler");
 	phase_start("escrever");
 	write_data(2);

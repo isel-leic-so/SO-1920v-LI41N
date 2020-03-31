@@ -1,5 +1,8 @@
 // texec.cpp : Defines the entry point for the console application.
+// A simple illustration of the separated virtual address spaces for diferent processes
+// test launching two instances of the program
 //
+// Isel, 2020
 
 #include "stdio.h"
 

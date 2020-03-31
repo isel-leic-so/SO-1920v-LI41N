@@ -1,3 +1,10 @@
+/*------------------------------------------------
+ * Illustrates the use of an anonymous pipe for 
+ * communication from child to father
+ * 
+ * Isel, 2020
+ *---------------------------------------------*/
+
 #include <stdio.h>
 #include <unistd.h>
 #include <errno.h>

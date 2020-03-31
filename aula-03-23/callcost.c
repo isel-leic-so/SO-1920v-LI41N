@@ -35,8 +35,7 @@ int main() {
 	int nice_val;
 	
 	for(int i=0; i < NCALLS; ++i) {
-		nice_val = getpriority(PRIO_PROCESS, getpid());
-		if (i==0) printf("priority=%d\n", nice_val);
+		nice_val = nice(0);
 	}
 	
 	

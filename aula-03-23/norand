@@ -1,4 +1,0 @@
-#!/bin/bash
-
-setarch `uname -m` -R ./$1
-
