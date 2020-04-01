@@ -25,7 +25,7 @@ static const char *names[] = {
 int total_names = sizeof(names)/sizeof(names[0]);
 
 
-int map_file(const char *path, file_map *fmap, int newsize) {
+int map_file(const char *path, file_map *fmap, size_t newsize) {
 	int fd = open(path, O_CREAT | O_RDWR, 0666);
 	if (fd == -1) return -1;
 	

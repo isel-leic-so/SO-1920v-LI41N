@@ -10,7 +10,7 @@ typedef struct  {
 	int len;
 } file_map;
 
-int map_file(const char *path, file_map *fmap, int newsize);
+int map_file(const char *path, file_map *fmap, size_t newsize);
 	
 void unmap_file(file_map *fmap);
 

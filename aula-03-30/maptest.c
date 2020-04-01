@@ -1,6 +1,6 @@
 
 /*-----------------------------------------------------------------
- * This program illustrates the behaviour of a file map opertaion
+ * This program illustrates the behaviour of a file map operation
  * by showing several virtual memory stats at selected phases in
  * program execution
  * 
@@ -16,10 +16,9 @@
 #include "../utils/memutils.h"
 
 
-long sum_ints(int *ints) {
+long sum_ints(int *ints, int len) {
 	long sum =0;
-	int *ints = fmap.base;
-	for(int i=0; i < fmap.len/sizeof(int);++i) {
+	for(int i=0; i < len;++i) {
 		sum += ints[i];
 	}
 	return sum;
@@ -50,14 +49,18 @@ int main(int argc, char *argv[]) {
 
 	phase_start("read");
 	
-	long sum = sum_ints((int *) fmap.base);
+	long sum = sum_ints((int *) fmap.base, fmap.len/sizeof(int));
 	printf("sum=%ld\n", sum);
 	
 	show_avail_mem("depois do read");
-	phase_start("terminar");
+	phase_start("incrementar o primeiro elemento");
 	
 	// decomment the next line to change the mapped file
-	//ints[0] = 10;
+	int *first = (int*) fmap.base;
+	printf("ints[0] =%d\n", first[0]);
+	first[0]++;
+	show_avail_mem("depois do write");
+	phase_start("terminar");
 	unmap_file(&fmap);
 	return 0;
 }
