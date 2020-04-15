@@ -12,61 +12,60 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <stdlib.h>
+#include <stdbool.h>
+#include <string.h>
 
 #include "../utils/memutils.h"
+#include "../utils/memutils2.h"
 
+#define SHMEM_SIZE (1000*1000*sizeof(int))
 
 long sum_ints(int *ints, int len) {
 	long sum =0;
-	for(int i=0; i < len;i+= 1024) {
+	for(int i=0; i < len;++i) {
 		sum += ints[i];
-		
-		show_avail_mem("one more page");
-		phase_start("next");
-	
 	}
 	return sum;
 }
 
+void write_ints(int *ints, int len) {
+	for(int i=0; i < len;++i) {
+		ints[i] = 1;
+	}
+}
+
 int main(int argc, char *argv[]) {
-	if (argc <2 || argc > 3) {
-		printf("usage: maptest <file>  [<size>]\n");
+	if (argc != 2) {
+		printf("usage: smem <name> n");
 		return 1;
 	}
 	
-	file_map fmap;
-	int size = 0;
 	
-	if (argc == 3)  
-		size = atoi(argv[2]);
-	printf("size=%d\n", size);
+	char *name = argv[1];
+	 
 	show_avail_mem("Inicio");
 	phase_start("file map");
 	
-	int res = map_file(argv[1], &fmap, size);
-	if (res != 0) {
-		printf("error %d mapping the file\n", res);
+	void *smem = shmem(name, SHMEM_SIZE);
+	if (smem == NULL) {
+		printf("error  mapping the file\n");
 		return 2;
 	}
-	printf("mapped at %p\n", fmap.base);
+	printf("mapped at %p\n", smem);
 	show_avail_mem("depois do map");
 
-	phase_start("read");
+	phase_start("escrever");
 	
-	long sum = sum_ints((int *) fmap.base, fmap.len/sizeof(int));
-	printf("sum=%ld\n", sum);
+	int nints = SHMEM_SIZE/sizeof(int);
+	int *ints = (int *) smem;
 	
-	show_avail_mem("depois do read");
-	phase_start("incrementar o primeiro elemento");
+	write_ints(ints, nints);
+		
 	
-	// decomment the next line to change the mapped file
-	int *first = (int*) fmap.base;
-	printf("ints[0] =%d\n", first[0]);
-	first[0]++;
-	show_avail_mem("depois do write");
+ 	show_avail_mem("depois de escrever");
 	phase_start("unmap");
 	
-	unmap_file(&fmap);
+	munmap(smem, SHMEM_SIZE);
 	show_avail_mem("depois do unmap");
 	phase_start("terminar");
 	return 0;

@@ -17,7 +17,7 @@
 
 int main(int argc, char *argv[]) {
 	if (argc < 2 || argc > 3) {
-		printf("usage: intfile <size> [ <file> ] \n");
+		printf("usage: genints <size> [ <file> ] \n");
 		return 1;
 	}
 	
