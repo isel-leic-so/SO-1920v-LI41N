@@ -11,7 +11,7 @@ client:	client.o libmath.so
 	gcc -o client client.o ./libmath.so 
 	
 client.o: client.c
-	gcc  -c -Wall client.c 
+	gcc  -c -Wall -g client.c 
 
 clientdyn: clientdyn.o
 	gcc -o clientdyn clientdyn.o ../utils/memutils.c  -ldl -lrt

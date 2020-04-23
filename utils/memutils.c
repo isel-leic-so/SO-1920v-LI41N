@@ -44,7 +44,7 @@ int map_file(const char *path, file_map *fmap, size_t newsize) {
 	else newsize = stat.st_size;
 	
  
-	void *base = mmap(NULL, newsize, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+	void *base = mmap(NULL, newsize, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0);
 	if (base == (void*) -1) {
 		perror("error mapping file!");
 		return -4;
