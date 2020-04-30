@@ -21,8 +21,8 @@ long sum_ints(int *ints, int len) {
 	for(int i=0; i < len;i+= 1024) {
 		sum += ints[i];
 		
-		show_avail_mem("one more page");
-		phase_start("next");
+		//show_avail_mem("one more page");
+		//phase_start("next");
 	
 	}
 	return sum;
