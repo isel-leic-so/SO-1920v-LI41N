@@ -25,6 +25,7 @@ int main() {
 		// child process
 		printf("I,m child with parent %d(%d)\n", getppid(), parent);
 		printf("and process id = %d\n", getpid());
+		exit(0);
 		 
 	}
 	else if (child > 0) {
@@ -42,6 +43,10 @@ int main() {
 		sleep(1);
 	}
 	
-	wait(&status);
+	int res = waitpid(child, &status, 0);
+	printf("first wait = %d\n", res);
+	
+	res = waitpid(child, &status, 0);
+	printf("second wait = %d\n", res);
 	return 0;
 }
