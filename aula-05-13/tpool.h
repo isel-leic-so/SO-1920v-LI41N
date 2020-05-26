@@ -3,6 +3,7 @@
 
 #include <pthread.h>
 #include "queue.h"
+#include <stdbool.h>
 
 #define NTHREADS 8
 
@@ -16,6 +17,8 @@ typedef struct {
 typedef struct {
 	pthread_t threads[NTHREADS];
 	queue_t queue;
+	bool terminated;
+	pthread_mutex_t lock;
 } tpool_t;
 
 

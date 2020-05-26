@@ -137,7 +137,9 @@ inline
 VOID Schedule () {
 	PUTHREAD NextThread;
     NextThread = ExtractNextReadyThread();
+    running_thread->state = Ready;
 	context_switch(running_thread, NextThread);
+	NextThread->state = Running;
 }
 
 ///////////////////////////////
@@ -300,6 +302,11 @@ VOID  cleanup_thread (PUTHREAD Thread) {
 		free(Thread);
 }
 
+
+enum State ut_get_state(HANDLE t) {
+	return ((PUTHREAD) t)->state;
+}
+
 //
 // functions with implementation dependent of X86 or x64 platform
 //
@@ -324,7 +331,7 @@ HANDLE UtCreate32 (UT_FUNCTION Function, UT_ARGUMENT Argument) {
 	// Zero the stack for emotional confort.
 	//
 	memset(Thread->Stack, 0, STACK_SIZE);
-
+	thread->state = Ready;
 	//
 	// Memorize Function and Argument for use in internal_start.
 	//

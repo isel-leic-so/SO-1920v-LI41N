@@ -22,6 +22,7 @@
 
 #define UTHREAD_API
 
+enum State { Ready, Running, Blocked };
 
 typedef void VOID;
 typedef void *HANDLE;
@@ -145,7 +146,8 @@ BOOLEAN UtTryGetThreadResult(HANDLE ThreadHandle, LONG* result);
 //		TRUE  -> Yhe avaiable thread result is save in the long pointed by "result"
 UTHREAD_API
 BOOLEAN UtGetThreadResult(HANDLE ThreadHandle, LONG* result);
-	 
+
+enum State ut_get_state(HANDLE t);
 
 #ifdef __cplusplus
 } // extern "C"

@@ -248,7 +248,6 @@ void  cleanup_thread (PUTHREAD thread) {
 }
 
 
-
 //
 // Creates a user thread to run the specified function. The thread is placed
 // at the end of the ready queue.
@@ -273,6 +272,7 @@ HANDLE ut_create (UT_FUNCTION function, UT_ARGUMENT argument) {
 	//
 	thread->function = function;
 	thread->argument = argument;
+
 	
 	//
 	// Map an UTHREAD_CONTEXT instance on the thread's stack.

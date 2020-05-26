@@ -21,7 +21,7 @@ typedef struct {
 void queue_init(queue_t * q);
 void queue_put(queue_t * q, void * item);
 void * queue_get(queue_t * q);
-
+void queue_destroy(queue_t * q);
 
 #endif
 

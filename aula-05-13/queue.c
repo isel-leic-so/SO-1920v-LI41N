@@ -41,3 +41,8 @@ void * queue_get(queue_t * q)  {
 	pthread_mutex_unlock(&q->lock);
 	return item;
 }
+
+void queue_destroy(queue_t * q) {
+	pthread_mutex_destroy(&q->lock);
+	pthread_cond_destroy(&q->hasItems);
+}

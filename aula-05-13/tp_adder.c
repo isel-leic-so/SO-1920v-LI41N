@@ -10,7 +10,7 @@
 
 #define NITERS 50
 #define NPROCS 4
-#define NVALS 50000 
+#define NVALS 50000
 
 typedef struct range {
 	int *start, *end;

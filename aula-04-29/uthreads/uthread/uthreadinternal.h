@@ -68,7 +68,7 @@ typedef struct {
 typedef struct _UTHREAD {
 	PUTHREAD_CONTEXT ThreadContext;	// this must always be the first field!
 	LIST_ENTRY       Link;
-
+	enum State state;
 	// the two next fields are used
 	// to support thread returning a value on termination
 	// which can be consumed by other threads
