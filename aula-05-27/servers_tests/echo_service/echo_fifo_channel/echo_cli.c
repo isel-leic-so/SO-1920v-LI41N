@@ -11,9 +11,10 @@
 #include <errno.h>
 #include <signal.h>
 #include "echo_service.h"
+#include "chrono.h"
  
 
-#define NTRIES 10000
+#define NITERS 10000
 
 
 int create_fifo(const char *name) {
@@ -70,19 +71,21 @@ int main(int argc, char *argv[]) {
  
 	printf("start...\n");
 	
-	for(int try=1; try <= NTRIES; try++) {
+	chrono_t chron = chrono_start();
+	for(int try=1; try <= NITERS; try++) {
 		sprintf(msg.msg, "Hello_%d_%d", msg.sender, try);
 		write(sfd, &msg, sizeof(echo_msg_t));
 		// get response
 	
 		read(cfd, &resp, sizeof(echo_msg_t));
-		printf("%s\n", resp.msg);
+		//printf("%s\n", resp.msg);
 	}
-
+	printf("%d tries in %ld micros!\n", NITERS, chrono_micros(chron));
  
-	unlink(client_fifo_name);
+	
 	close(sfd);
 	close(cfd);
+	unlink(client_fifo_name);
 	 
 	printf("client done!\n\n");
 	return 0;

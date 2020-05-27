@@ -4,7 +4,7 @@ CC = gcc
 
 CFLAGS = -fPIC -g -Wall
 
-SRCS = meminfo.c sysutils.c memutils.c
+SRCS = meminfo.c sysutils.c memutils.c chrono.c
 
 OBJS = $(SRCS:.c=.o)
 
