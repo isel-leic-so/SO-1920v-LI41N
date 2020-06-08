@@ -55,39 +55,6 @@ int create_bind_server_socket(const char* ip_addr, int port) {
 	return sfd;
 }
 
-int init(const char* ip_addr, int port)  {
-	struct epoll_event evd; // for listen socket
-
-	listenfd = create_bind_server_socket(ip_addr, port);
-	if (listenfd == -1) return -1;
-	
-	if ((epoll_fd = epoll_create(EPOOL_MAX_FDS)) == -1) {
-		close(listenfd);
-		return -2;
-	}
- 
-	evd.data.fd = listenfd;
-	evd.events = EPOLLIN;
-	
-	if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, listenfd, &evd) == -1) {
-		close(listenfd);
-		return -3;
-	}
-	
-	  // set listen queue size
-	if (listen(listenfd, BACKLOG) == -1) {
-		fprintf(stderr, "error setting  listen queue size\n");
-		close(listenfd);
-		return -4;
-	}
-	
-	 
-		
-	nclients = 1;
-	
-	return 0;
-}
-
 int add_client(int cfd) {
 	struct epoll_event evd;  
 
@@ -99,16 +66,58 @@ int add_client(int cfd) {
 	return 0;
 }
 
+
 int rem_client(int cfd) {
-	struct epoll_event evd;  
-
-	evd.data.fd = cfd;
-	evd.events = EPOLLIN | EPOLLERR;
-	if (epoll_ctl(epoll_fd, EPOLL_CTL_DEL, cfd, &evd) == -1) return -1;
-
+ 
+	
+	if (epoll_ctl(epoll_fd, EPOLL_CTL_DEL, cfd, NULL) == -1) {
+		printf("error removing descriptor from epoll!\n");
+		return -1;
+	}
 	nclients--;
+
 	return 0;
 }
+
+
+
+int init(const char* ip_addr, int port)  {
+ 
+	listenfd = create_bind_server_socket(ip_addr, port);
+	if (listenfd == -1) return -1;
+	
+	if ((epoll_fd = epoll_create(EPOOL_MAX_FDS)) == -1) {
+		close(listenfd);
+		return -2;
+	}
+ 
+ 	nclients = 0;
+ 	
+	if (add_client(listenfd) != 0) {
+		close(listenfd);
+		return -2;
+	}
+	
+	if (add_client(0) != 0) {
+		close(listenfd);
+		return -2;
+	}
+	
+	// set listen queue size
+	if (listen(listenfd, BACKLOG) == -1) {
+		fprintf(stderr, "error setting  listen queue size\n");
+		close(listenfd);
+		return -4;
+	}
+	
+	 
+		
+
+	
+	return 0;
+}
+
+
 
 
 void process_request(int cfd, echo_msg_t *request) {
@@ -138,13 +147,25 @@ void process(int nready) {
 			}
 		}
 		else if (evd->events & (EPOLLIN | EPOLLERR)) { 
+			
+			if (evd->data.fd == 0) {
+				// terminate loop
+				printf("teminate loop!\n");
+				
+				rem_client(listenfd);
+				rem_client(0);
+				close(listenfd);
+				continue;
+				 
+			}
 			echo_msg_t request;
 			cfd = evd->data.fd;
 			
 			int nr = read(cfd, &request, sizeof(request));
 			if (nr <= 0) {
-				 close(cfd);
 				 rem_client(cfd);
+				 close(cfd);
+				
 			}
 			else {	
 				process_request(cfd, &request);
@@ -160,6 +181,8 @@ void loop() {
 	int nready; 
 	
 	while(true)  {
+		if (nclients == 0) break;
+		printf("there are %d clients!\n", nclients);
 		nready = epoll_wait(epoll_fd, clients, nclients, INFINITE);
 		//printf("there are %d ready descriptors!\n", nready);
 		process(nready);	

@@ -6,7 +6,7 @@
 #define _ASSERTE assert
 #endif
 
-
+typedef unsigned char byte;
 
 typedef void *HANDLE;
 typedef int BOOL;

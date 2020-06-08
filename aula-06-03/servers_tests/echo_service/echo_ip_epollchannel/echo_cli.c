@@ -16,7 +16,7 @@
 #include "echo_service.h"
  
 
-#define NITERS 10000
+#define NITERS 40000
 
 int create_client_socket() {
 	return socket(AF_INET, SOCK_STREAM, 0); 
@@ -56,7 +56,7 @@ int main(int argc, char *argv[]) {
 		write(cfd, &msg, sizeof(echo_msg_t));
 		// get response
 		read(cfd, &resp, sizeof(echo_msg_t));
-		//printf("%s\n", resp.msg);
+		printf("%s\n", resp.msg);
 	}
 	
 	printf("%d tries in %ld micros!\n", NITERS, chrono_micros(chron));
