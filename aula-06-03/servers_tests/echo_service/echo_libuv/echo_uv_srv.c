@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <uv.h>
-
+#include <stdbool.h>
 #include "echo_service.h"
 
  
@@ -12,61 +12,69 @@ static uv_loop_t loop;
 static uv_tcp_t server;	
 static uv_tty_t input;   
 
-typedef struct {
-    uv_write_t req;
-    uv_buf_t buf;
-} write_req_t;
+char input_buf[128];
+static int nclients=0;
+bool to_destroy;
 
-
-void free_write_req(uv_write_t *req) {
-    write_req_t *wr = (write_req_t*) req;
-    free(wr->buf.base);
-    free(wr);
+void alloc_buffer(uv_handle_t *handle, size_t suggested_size, uv_buf_t *buf) {
+	channel_t *chn = (channel_t*) handle;
+    buf->base = chn->buffer;
+    buf->len = BUFFER_SIZE;
 }
 
  
-
-void alloc_buffer(uv_handle_t *handle, size_t suggested_size, uv_buf_t *buf) {
-    buf->base = (char*) malloc(1024);
-    buf->len = 1024;
+void alloc_buffer2(uv_handle_t *handle, size_t suggested_size, uv_buf_t *buf) {
+    buf->base = input_buf;
+    buf->len = 128;
 }
 
 void on_close(uv_handle_t* handle) {
     free(handle);
 }
 
+void on_close2(uv_handle_t* handle) {
+    printf("accept or input socket closed!\n");
+}
+
+
 void echo_write(uv_write_t *req, int status) {
     if (status) {
         fprintf(stderr, "Write error %s\n", uv_strerror(status));
     }
-    free_write_req(req);
 }
 
 void echo_read_stdin(uv_stream_t *client, ssize_t nread, const uv_buf_t *buf) {
-	 
+	printf("on callback: input buf address=%p\n", input_buf);
     printf("echo read stdin!\n");
-
-    free(buf->base);
+    to_destroy = true;
+    //uv_close((uv_handle_t*) &client, on_close2);
+    //uv_tcp_close_reset(&server, on_close2);
+    //uv_close((uv_handle_t*) &server, NULL);
+   
 }
 
 
 void echo_read(uv_stream_t *client, ssize_t nread, const uv_buf_t *buf) {
-	 
+	channel_t *chn = (channel_t*) client; 
     if (nread > 0) {
-        write_req_t *req = (write_req_t*) malloc(sizeof(write_req_t));
-        req->buf = uv_buf_init(buf->base, nread);
-        uv_write((uv_write_t*) req, client, &req->buf, 1, echo_write);
+        chn->buf_desc.base = chn->buffer;
+        chn->buf_desc.len =  nread;
+        uv_write( &chn->req, client, &chn->buf_desc, 1, echo_write);
         return;
     }
     if (nread < 0) {
         if (nread != UV_EOF)
             fprintf(stderr, "Read error %s\n", uv_err_name(nread));
-		 
-		uv_close((uv_handle_t*) client, NULL);
+		--nclients;
+		
+		uv_close((uv_handle_t*) client, on_close);
+		if (to_destroy && nclients == 0) {
+			uv_close((uv_handle_t*) &input, on_close2);
+			uv_tcp_close_reset(&server, on_close2);
+		}
+		
+		//free(client); 
     }
-
-    free(buf->base);
-   
 }
 
 void on_new_connection(uv_stream_t *server, int status) {
@@ -75,10 +83,13 @@ void on_new_connection(uv_stream_t *server, int status) {
         // error!
         return;
     }
-
-    uv_tcp_t *client = (uv_tcp_t*) malloc(sizeof(uv_tcp_t));
+	
+    uv_tcp_t *client = (uv_tcp_t*) malloc(sizeof(channel_t));
+    
     uv_tcp_init(&loop, client);
     if (uv_accept(server, (uv_stream_t*) client) == 0) {
+		printf("loop address %p on loop thread loop %ld\n", &loop, pthread_self());
+		nclients++;
         uv_read_start((uv_stream_t*) client, alloc_buffer, echo_read);
     }
     else {
@@ -93,7 +104,7 @@ int main() {
 	
     uv_loop_init(& loop);
 
-  
+    printf("input buf address=%p\n", input_buf);
     uv_tcp_init(&loop, &server);
 
     uv_ip4_addr(ECHO_SERVER_ADDR, ECHO_SERVER_PORT, &addr);
@@ -108,7 +119,7 @@ int main() {
 	// For asynchronous input receiving via uv loop
     
     uv_tty_init(&loop, &input, 0, 0);
-    uv_read_start((uv_stream_t*) &input, alloc_buffer, echo_read_stdin);
+    uv_read_start((uv_stream_t*) &input, alloc_buffer2, echo_read_stdin);
     
     
     // run the uv loop

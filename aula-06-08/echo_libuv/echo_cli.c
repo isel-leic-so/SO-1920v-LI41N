@@ -18,7 +18,7 @@
 #define MAX_SOCK_NAME 256
 #define CLIENT_SOCK_PREFIX "sock_client_"
 
-#define NITERS 1
+#define NITERS 10000
 
 int create_client_socket() {
 	return socket(AF_INET, SOCK_STREAM, 0); 
