@@ -26,6 +26,7 @@ void free_write_req(uv_write_t *req) {
 
 
 void alloc_buffer(uv_handle_t *handle, size_t suggested_size, uv_buf_t *buf) {
+	printf("alloc buf called!\n");
     buf->base = (char*) malloc(suggested_size);
     buf->len = suggested_size;
 }
@@ -45,8 +46,9 @@ static int nreads =0;
 
 void echo_read(uv_stream_t *client, ssize_t nread, const uv_buf_t *buf) {
 	//printf("echo_read %d\n", nreads);
-	++nreads;
+
     if (nread > 0) {
+		++nreads;
         write_req_t *req = (write_req_t*) malloc(sizeof(write_req_t));
         req->buf = uv_buf_init(buf->base, nread);
         uv_write((uv_write_t*) req, client, &req->buf, 1, echo_write);

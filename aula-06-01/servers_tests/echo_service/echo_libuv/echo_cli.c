@@ -18,7 +18,7 @@
 #define MAX_SOCK_NAME 256
 #define CLIENT_SOCK_PREFIX "sock_client_"
 
-#define NITERS 10000
+#define NITERS 10
 
 int create_client_socket() {
 	return socket(AF_INET, SOCK_STREAM, 0); 
@@ -58,7 +58,7 @@ int main(int argc, char *argv[]) {
 		write(cfd, &msg, sizeof(echo_msg_t));
 		// get response
 		read(cfd, &resp, sizeof(echo_msg_t));
-		//printf("%s\n", resp.msg);
+		printf("%s\n", resp.msg);
 	}
 	
 	printf("%d tries in %ld micros!\n", NITERS, chrono_micros(chron));

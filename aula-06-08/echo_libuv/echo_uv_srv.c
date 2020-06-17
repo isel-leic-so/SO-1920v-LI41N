@@ -17,7 +17,7 @@ static uv_loop_t loop;	// the libuv loop
 static uv_tcp_t server;	// server socket
 static uv_tty_t input;  // for asynchronous stdin access  
 
-static uv_work_t work;	// for submit work on file I/O threadpool
+
 
 char input_buf[128];	// input buffer 
 
@@ -106,7 +106,8 @@ void work_func(uv_work_t* req) {
  
 // callback called in loop thread when file I/O threadpool work completion 
 void complete_work_cb(uv_work_t* req, int status) {
-	printf("received eork completion status %d on thread %ld\n", status, pthread_self());
+	printf("received work completion status %d on thread %ld\n", status, pthread_self());
+	free(req);
 }
 
 
@@ -123,10 +124,11 @@ void on_new_connection(uv_stream_t *server, int status) {
     
     // to test submitting work to file I/O pool
     printf("loop address %p on loop thread loop %ld\n", &loop, pthread_self());
-	work.data = &loop;
+    uv_work_t* work = (uv_work_t*) malloc(sizeof(uv_work_t));	// for submit work on file I/O threadpool
+	work->data = &loop;
 	
 	// submit work
-	uv_queue_work(&loop, &work, work_func, complete_work_cb);
+	uv_queue_work(&loop, work, work_func, complete_work_cb);
 	
     if (uv_accept(server, (uv_stream_t*) client) == 0) {
 		nclients++;
